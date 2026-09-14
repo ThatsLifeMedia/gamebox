@@ -637,11 +637,18 @@ class Api:
 
     def settings_set(self, data):
         cur = self.settings_get()
+        tmp = SETTINGS + ".tmp"
         try:
             cur.update(data or {})
-            json.dump(cur, open(SETTINGS, "w", encoding="utf-8"), indent=1)
+            with open(tmp, "w", encoding="utf-8") as fh:
+                json.dump(cur, fh, indent=1)
+            os.replace(tmp, SETTINGS)
             return {"ok": True}
         except Exception as e:
+            try:
+                os.remove(tmp)
+            except OSError:
+                pass
             return {"ok": False, "msg": str(e)}
 
     # ---- setup
@@ -691,7 +698,7 @@ class Api:
         return {"ok": True, "drives": out, "launchers": launchers,
                 "scanner": os.path.exists(user_file("scan-library.py"))}
 
-    def start_scan(self, roots):
+    def start_scan(self, roots, opts=None):
         """Run the scanner on a thread, streaming its output back to the page.
 
         This used to shell out to `python -u scan-library.py`, which worked from
@@ -740,9 +747,10 @@ class Api:
             out = Tee(self._scan_lines)
             saved = sys.stdout
             code = 0
+            no_meta = bool((opts or {}).get("no_meta"))
             try:
                 sys.stdout = out
-                scanner.run_scan(roots, apply=True, should_stop=self._scan_stop.is_set)
+                scanner.run_scan(roots, apply=True, no_meta=no_meta, should_stop=self._scan_stop.is_set)
             except Exception as e:
                 self._scan_lines.put("Scan failed: %s: %s" % (type(e).__name__, e))
                 code = 1

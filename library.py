@@ -33,6 +33,7 @@ import hashlib
 import io
 import json
 import os
+import re
 import shutil
 import sys
 import time
@@ -95,8 +96,10 @@ def game_id(store, key=None, path=None):
 
 
 def art_name(gid, suffix=""):
-    """A game id as a filename. ':' is legal in an id and illegal in a path."""
-    return gid.replace(":", "-") + suffix
+    """A game id as a filename. ':' is legal in an id and illegal in a path,
+    and store-derived ids can carry other separators too, so keep only the
+    safe set."""
+    return re.sub(r"[^a-z0-9_-]", "-", gid, flags=re.I) + suffix
 
 
 # -------------------------------------------------------------------- records

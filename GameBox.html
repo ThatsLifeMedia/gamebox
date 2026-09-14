@@ -1050,26 +1050,26 @@ function caseHTML(g){
   const st=STORES[g.s],c=cov(g),m=g.meta||{};
   const front=c?`<div class="fc" style="background-image:url(${c})"></div>`
    :`<div class="fc" style="background:#151a22;display:grid;place-items:center;padding:8%">
-      <div style="font-family:var(--disp);font-weight:700;font-size:calc(var(--w)*.09);text-align:center">${g.short}</div></div>`;
+      <div style="font-family:var(--disp);font-weight:700;font-size:calc(var(--w)*.09);text-align:center">${esc(g.short)}</div></div>`;
   const shots=(m.shots||[]).slice(0,3);
   const shotHTML=shots.length?shots.map(s=>`<i style="background-image:url(${s})"></i>`).join("")
     :`<i style="background-image:url(${c||""})"></i><i style="background-image:url(${c||""});filter:hue-rotate(28deg)"></i><i style="background-image:url(${c||""});filter:saturate(1.4) brightness(1.15)"></i>`;
-  const feats=(m.cats||[]).slice(0,5).map(x=>`<span>${x.replace("Full controller support","Controller").replace("Shared/Split Screen","Split screen")}</span>`).join("")
-    ||`<span>${g.badge||"PC"}</span><span>${g.via}</span>`;
+  const feats=(m.cats||[]).slice(0,5).map(x=>`<span>${esc(x.replace("Full controller support","Controller").replace("Shared/Split Screen","Split screen"))}</span>`).join("")
+    ||`<span>${esc(g.badge||"PC")}</span><span>${esc(g.via)}</span>`;
   const desc=m.desc||g.note||"Installed on drive Z: and ready to launch.";
   const rate=(g.rate||"").split(" ")[0]||"PC";
   return `<div class="case3d" style="--ry:-22deg">${front}
     <div class="fc bk">
       <div class="band"><span class="pf">${g.badge?g.badge:"PC"} · ${st.n.toUpperCase()}</span><span class="gb">GAMEBOX</span></div>
       <div class="body">
-        <h6>${g.t}</h6>
+        <h6>${esc(g.t)}</h6>
         <div class="shots">${shotHTML}</div>
-        <div class="desc">${desc}</div>
+        <div class="desc">${esc(desc)}</div>
         <div class="feat">${feats}</div>
         <div class="credits">
-          ${m.dev?`<div><b>Developer</b> ${m.dev}</div>`:""}
-          ${m.pub?`<div><b>Publisher</b> ${m.pub}</div>`:""}
-          ${m.genres&&m.genres.length?`<div><b>Genre</b> ${m.genres.join(" · ")}</div>`:""}
+          ${m.dev?`<div><b>Developer</b> ${esc(m.dev)}</div>`:""}
+          ${m.pub?`<div><b>Publisher</b> ${esc(m.pub)}</div>`:""}
+          ${m.genres&&m.genres.length?`<div><b>Genre</b> ${esc(m.genres.join(" · "))}</div>`:""}
           ${m.rel?`<div><b>Released</b> ${m.rel}</div>`:""}
         </div>
       </div>
@@ -1084,7 +1084,7 @@ function caseHTML(g){
         <div class="barcode"><i></i><span>${String(1000000+g.id*7919).slice(0,7)}</span></div>
       </div>
     </div>
-    <div class="spine" style="background:linear-gradient(90deg,#05070c,${st.c})"><em>${g.short}</em></div>
+    <div class="spine" style="background:linear-gradient(90deg,#05070c,${st.c})"><em>${esc(g.short)}</em></div>
     <div class="gloss"></div>
     <div class="floorshadow"></div>
   </div>`;
@@ -1230,12 +1230,12 @@ function heroHTML(g){
     <div class="cover" style="${c?`background-image:url(${c})`:""}" data-inspect="${g.id}"></div>
     <div class="body">
       <div class="kicker"><span class="dot"></span>${g.played?"CONTINUE PLAYING · LAST SESSION "+g.played.toUpperCase():"IN YOUR LIBRARY · NOT LAUNCHED YET"}</div>
-      <h2 class="htitle">${g.t}</h2>
-      <p class="hsub">${m.desc||g.note||"Installed on drive Z: and ready to launch."}</p>
+      <h2 class="htitle">${esc(g.t)}</h2>
+      <p class="hsub">${esc(m.desc||g.note||"Installed on drive Z: and ready to launch.")}</p>
       <div class="hfacts">
         <span class="storechip"><i style="background:${st.c};color:${st.c}"></i>${st.n}</span>
         <span>Installed <b>${g.gb} GB</b></span><span>Updated <b>${g.upd}</b></span>
-        ${m.dev?`<span>By <b>${m.dev}</b></span>`:""}
+        ${m.dev?`<span>By <b>${esc(m.dev)}</b></span>`:""}
         ${m.rel?`<span>Released <b>${m.rel}</b></span>`:""}
       </div>
       <div class="hactions">
@@ -1244,7 +1244,7 @@ function heroHTML(g){
         <button class="btn2" type="button" data-detail="${g.id}"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M12 11v5m0-8h.01"/></svg>Details</button>
         <button class="btn2 icon ${isFav(g)?"fav":""}" type="button" data-fav="${g.id}" aria-label="Favorite"><svg viewBox="0 0 24 24"><path d="M12 4l2.4 5 5.6.8-4 3.9 1 5.5-5-2.7-5 2.7 1-5.5-4-3.9 5.6-.8z"/></svg></button>
       </div>
-      <div class="hpath"><svg viewBox="0 0 24 24"><path d="M3 7h6l2 2h10v10H3z"/></svg>${g.path}</div>
+      <div class="hpath"><svg viewBox="0 0 24 24"><path d="M3 7h6l2 2h10v10H3z"/></svg>${esc(g.path)}</div>
     </div>
   </div>`;
 }
@@ -1286,12 +1286,12 @@ function pageLibrary(){
       `<th class="${k==="size"?"num":""}" data-sortcol="${k}">${l}${S.sort===k?' <span class="sortarrow">▼</span>':""}</th>`).join("")}<th></th></tr></thead>
       <tbody>${v.map(g=>{const st=STORES[g.s],[lab,cls]=stateLabel(g),c=cov(g);
       return `<tr data-id="${g.id}" class="${g.id===S.sel?"sel":""}">
-        <td class="title"><span class="lthumb" style="${c?`background-image:url(${c})`:""}"></span>${isFav(g)?"★ ":""}${g.t}</td>
+        <td class="title"><span class="lthumb" style="${c?`background-image:url(${c})`:""}"></span>${isFav(g)?"★ ":""}${esc(g.t)}</td>
         <td class="st" style="color:${st.c}">${st.n}</td><td><span class="pill ${cls||"mute"}">${lab}</span></td>
         <td class="num mono">${g.gb.toFixed(1)}</td><td class="mono">${g.upd}</td>
         <td class="mono" style="color:${g.played?"var(--tx2)":"var(--tx3)"}">${g.played||"—"}</td>
         <td><span class="pill ${g.art&&g.art.s==="generated"?"warn":"ok"}">${asrc(g)||"NONE"}</span></td>
-        <td class="pathcell">${g.path}</td>
+        <td class="pathcell">${esc(g.path)}</td>
         <td style="text-align:right"><button class="rowplay" data-play="${g.id}">${g.state==="err"?"FIX":"PLAY"}</button></td></tr>`}).join("")}</tbody></table>`;
   }else pageDetails(v);
 }
@@ -1301,15 +1301,15 @@ function pageDetails(v){
   const tabs=[["overview","Overview"],["files","Files",(g.files||[]).length],["saves","Saves"],["activity","Activity"]];
   content.innerHTML=`<div class="dwrap">
     <div class="dlist">${v.map(y=>{const c=cov(y);return `<div class="drow${y.id===S.sel?" sel":""}" data-id="${y.id}">
-      <span class="th" style="${c?`background-image:url(${c})`:""}"></span><span class="nm">${y.short}</span><span class="sz">${y.gb}</span></div>`}).join("")}</div>
+      <span class="th" style="${c?`background-image:url(${c})`:""}"></span><span class="nm">${esc(y.short)}</span><span class="sz">${y.gb}</span></div>`}).join("")}</div>
     <div class="dpane">${a?`<div class="dbannerart" style="background-image:url(${a})"></div>`:""}
       <div class="dinner">
         <div class="dbanner">
           <div class="dstage" id="dstage" data-inspect="${g.id}"></div>
           <div class="dmeta">
             <div class="kicker"><span class="dot"></span>${st.n.toUpperCase()} · ${g.via.toUpperCase()}</div>
-            <h2 class="dtitle">${g.t}</h2>
-            <p class="hsub">${m.desc||g.note||""}</p>
+            <h2 class="dtitle">${esc(g.t)}</h2>
+            <p class="hsub">${esc(m.desc||g.note||"")}</p>
             <div class="hactions">
               <button class="btn-play" type="button" data-play="${g.id}"><svg viewBox="0 0 24 24"><path d="M8 5l12 7-12 7z"/></svg>PLAY</button>
               <button class="btn2" type="button" data-inspect="${g.id}"><svg viewBox="0 0 24 24"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 3v18"/></svg>Inspect case</button>
@@ -1317,7 +1317,7 @@ function pageDetails(v){
               <button class="btn2" type="button" data-hide="${g.id}">Hide</button>
               <button class="btn2" type="button" data-drop="${g.id}" title="Remove it, and stop the scanner finding it again">Remove…</button>
             </div>
-            <div class="hpath"><svg viewBox="0 0 24 24"><path d="M3 7h6l2 2h10v10H3z"/></svg>${g.path}</div>
+            <div class="hpath"><svg viewBox="0 0 24 24"><path d="M3 7h6l2 2h10v10H3z"/></svg>${esc(g.path)}</div>
           </div>
         </div>
         <div class="dtabs">${tabs.map(([k,l,b])=>`<span class="dtab ${S.tab===k?"on":""}" data-tab="${k}">${l}${b?`<span class="b">${b}</span>`:""}</span>`).join("")}</div>
@@ -1331,7 +1331,7 @@ function tabBody(g,lab,cls){
   const m=g.meta||{},st=STORES[g.s];
   if(S.tab==="files"){
     const f=g.files||[];
-    return `<div class="dcard wide" style="margin-bottom:.5cqw"><div class="k">INSTALL PATH</div><div class="v path">${g.path}</div></div>
+    return `<div class="dcard wide" style="margin-bottom:.5cqw"><div class="k">INSTALL PATH</div><div class="v path">${esc(g.path)}</div></div>
      ${f.length?`<table class="ftable"><thead><tr><th>NAME</th><th style="width:8cqw">TYPE</th><th class="num" style="width:7cqw">SIZE</th></tr></thead>
       <tbody>${f.map(x=>`<tr><td class="n ${x.d?"dir":""}">
         <svg viewBox="0 0 24 24">${x.d?'<path d="M3 7h6l2 2h10v10H3z"/>':'<path d="M6 3h8l4 4v14H6z"/><path d="M14 3v5h5"/>'}</svg>${x.n}</td>
@@ -1366,21 +1366,21 @@ function tabBody(g,lab,cls){
       <span class="when">${w||(t==="Time played"||t==="Sessions"?"none yet":"never")}</span></div>`).join("")}</div>`;
   }
   return `<div class="dgrid">
-    ${m.desc?`<div class="dcard wide"><div class="k">ABOUT</div><p class="blurb" style="margin-top:.25cqw">${m.desc}</p></div>`:""}
+    ${m.desc?`<div class="dcard wide"><div class="k">ABOUT</div><p class="blurb" style="margin-top:.25cqw">${esc(m.desc)}</p></div>`:""}
     ${(m.shots||[]).length?`<div class="dcard wide"><div class="k">SCREENSHOTS</div><div class="shotrow">${m.shots.map(s=>`<img src="${s}" alt="">`).join("")}</div></div>`:""}
     <div class="dcard"><div class="k">SIZE ON DISK</div><div class="v">${g.gb} <small>GB</small></div></div>
     <div class="dcard"><div class="k">STATE</div><div class="v" style="font-size:.8cqw;color:${cls==="err"?"var(--bad)":cls==="upd"?"var(--warn)":cls==="new"?"var(--ok)":"var(--tx)"}">${lab}</div></div>
     <div class="dcard"><div class="k">LAST PLAYED</div><div class="v" style="font-size:.8cqw">${g.played||"Never"}</div></div>
     <div class="dcard"><div class="k">PLAYTIME</div><div class="v" style="font-size:.8cqw">${g.secs?hrs(g.secs):"—"}${g.plays?`<small style="display:block;font-size:.55cqw;color:var(--tx3)">${g.plays} session${g.plays===1?"":"s"}</small>`:""}</div></div>
-    ${m.dev?`<div class="dcard"><div class="k">DEVELOPER</div><div class="v" style="font-size:.75cqw">${m.dev}</div></div>`:""}
-    ${m.pub?`<div class="dcard"><div class="k">PUBLISHER</div><div class="v" style="font-size:.75cqw">${m.pub}</div></div>`:""}
+    ${m.dev?`<div class="dcard"><div class="k">DEVELOPER</div><div class="v" style="font-size:.75cqw">${esc(m.dev)}</div></div>`:""}
+    ${m.pub?`<div class="dcard"><div class="k">PUBLISHER</div><div class="v" style="font-size:.75cqw">${esc(m.pub)}</div></div>`:""}
     ${m.rel?`<div class="dcard"><div class="k">RELEASED</div><div class="v" style="font-size:.8cqw">${m.rel}</div></div>`:""}
     <div class="dcard"><div class="k">SOURCE</div><div class="v" style="font-size:.8cqw;color:${st.c}">${st.n}</div></div>
     <div class="dcard"><div class="k">ARTWORK</div><div class="v" style="font-size:.8cqw;color:${g.art&&g.art.s==="generated"?"var(--warn)":"var(--ok)"}">${asrc(g)||"None"}</div></div>
     <div class="dcard"><div class="k">RATING</div><div class="v" style="font-size:.8cqw">${g.rate||"—"}</div></div>
     ${(m.genres||[]).length||(m.cats||[]).length?`<div class="dcard wide"><div class="k">GENRE &amp; FEATURES</div>
       <div class="tagrow" style="margin-top:.3cqw">${[...(m.genres||[]),...(m.cats||[])].map(x=>`<span class="tag">${x}</span>`).join("")}</div></div>`:""}
-    <div class="dcard wide"><div class="k">INSTALL PATH</div><div class="v path">${g.path}</div></div>
+    <div class="dcard wide"><div class="k">INSTALL PATH</div><div class="v path">${esc(g.path)}</div></div>
   </div>`;
 }
 function pageHome(){
@@ -1442,6 +1442,7 @@ function pageSettings(){
     ["motion","Case animations","Spin and flip the 3D case when you select a game",LS("motion",true)],
     ["ambient","Ambient artwork","Light the app with the selected game's art",LS("ambient",true)],
     ["scanstart","Scan on launch","Check drives and stores every time GameBox opens",LS("scanstart",false)],
+    ["fetchmeta","Fetch artwork & store info online","Cover art and store descriptions are fetched from Steam's public endpoints during a scan",LS("fetchmeta",true)],
     ["hidegen","Flag generated covers","Mark titles whose artwork was generated",LS("hidegen",true)]];
   content.innerHTML=`<div class="sechead"><h3>Settings</h3><span class="n">stored on this machine</span></div>
     <div class="setwrap">
@@ -1496,10 +1497,10 @@ function renderSide(){
     `<div class="kv"><span>Store</span><b>${st.n}</b></div>
      <div class="kv"><span>Installed size</span><b>${g.gb} GB</b></div>
      <div class="kv"><span>Last played</span><b>${g.played||"Never"}</b></div>
-     ${m.dev?`<div class="kv"><span>Developer</span><b style="font-size:.55cqw">${m.dev}</b></div>`:""}
+     ${m.dev?`<div class="kv"><span>Developer</span><b style="font-size:.55cqw">${esc(m.dev)}</b></div>`:""}
      <div class="kv"><span>Artwork</span><b class="${g.art&&g.art.s==="generated"?"warnc":"ok"}">${asrc(g)||"None"}</b></div>
      <div class="kv"><span>Files</span><b class="${g.state==="err"?"err":"ok"}">${g.state==="err"?"Missing":"Verified"}</b></div>
-     <div class="pathbox">${g.path}</div>`;
+     <div class="pathbox">${esc(g.path)}</div>`;
   document.getElementById("selActs").innerHTML=
     `<button class="btn2" data-play="${g.id}">Play</button>
      <button class="btn2" data-detail="${g.id}">Details</button>
@@ -1996,14 +1997,14 @@ function openInspector(id,fromEl){
   instage.insertAdjacentHTML("beforeend",caseHTML(g));
   const c=instage.querySelector(".case3d");ry=-22;rx=6;insFlipped=false;
   inpanel.innerHTML=`<div class="kick">CASE INSPECTOR · ${st.n.toUpperCase()}</div>
-    <h2>${g.t}</h2><p class="hsub">${m.desc||g.note||""}</p>
+    <h2>${esc(g.t)}</h2><p class="hsub">${esc(m.desc||g.note||"")}</p>
     <div class="facts">
       <div><div class="k">SIZE</div><div class="v">${g.gb} GB</div></div>
       <div><div class="k">${g.secs?"PLAYTIME":"LAST PLAYED"}</div><div class="v" style="font-size:.72cqw">${g.secs?hrs(g.secs):(g.played||"Never")}</div></div>
-      <div><div class="k">DEVELOPER</div><div class="v" style="font-size:.68cqw">${m.dev||"—"}</div></div>
+      <div><div class="k">DEVELOPER</div><div class="v" style="font-size:.68cqw">${esc(m.dev||"—")}</div></div>
       <div><div class="k">RELEASED</div><div class="v" style="font-size:.68cqw">${m.rel||"—"}</div></div>
     </div>
-    <div class="p">${g.path}</div>
+    <div class="p">${esc(g.path)}</div>
     <div class="hactions">
       <button class="btn-play" type="button" data-play="${g.id}"><svg viewBox="0 0 24 24"><path d="M8 5l12 7-12 7z"/></svg>PLAY</button>
       <button class="btn2" id="flipbtn" type="button"><svg viewBox="0 0 24 24"><path d="M4 8a8 8 0 0 1 14-4M20 16a8 8 0 0 1-14 4"/><path d="M18 2v4h-4M6 22v-4h4"/></svg>Flip case</button>
@@ -2202,7 +2203,7 @@ function suScan(){
   const api=bridge();
   if(!api||!api.start_scan){SU.step=3;SU.found=G.length;suRender();return}
   SU.lines=["Starting scan of "+SU.picked.join(", ")+"\u2026"];SU.step=2;SU.ran=true;suRender();
-  api.start_scan(SU.picked).then(function(j){
+  api.start_scan(SU.picked,{no_meta:!LS("fetchmeta",true)}).then(function(j){
     if(!j.ok){SU.lines.push('<span class="w">'+j.msg+'</span>');suRender();
       document.getElementById("setupnext").disabled=false;return}
     SU.poll=setInterval(function(){

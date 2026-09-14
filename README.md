@@ -7,6 +7,11 @@ GameBox is a small native Windows app. It scans what is actually installed on yo
 drives, pulls the cover art your launchers already cached, and gives you a single
 library to browse and launch from. No account, no telemetry, no background service.
 
+One honest exception: scans fetch cover art and store info (titles, descriptions) from
+Steam's public endpoints, so Valve sees your IP alongside game titles. There is a
+Settings toggle ("Fetch artwork & store info online") to turn that off, or run
+`scan-library.py --no-meta` to skip it.
+
 ## Built with AI, and I am not hiding it
 
 Yes — this was built with AI. Claude Code wrote the code. AI is a tool, the same as

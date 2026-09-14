@@ -690,12 +690,12 @@ def artwork(game, gog_index, stem, want_meta=True):
         fc = gog_index.get(game["cover_hash"] + "_glx_vertical_cover.webp")
         if fc:
             fb = gog_index.get((game.get("bg_hash") or "") + "_glx_bg_top_padding_7.webp")
-            aid = appid or steam_appid(game["title"])
+            aid = appid or (steam_appid(game["title"]) if want_meta else None)
             return (enc(Image.open(fc), 300, 450, 80, stem),
                     enc(Image.open(fb), 640, 300, 70, stem + "-h") if fb else None,
                     "gog-cache", store_meta(aid, stem) if (aid and want_meta) else None)
-    aid = appid or steam_appid(game["title"])
-    if aid:
+    aid = appid or (steam_appid(game["title"]) if want_meta else None)
+    if aid and want_meta:
         raw = get("https://cdn.akamai.steamstatic.com/steam/apps/%s/library_600x900.jpg" % aid)
         if raw:
             hero = get("https://cdn.akamai.steamstatic.com/steam/apps/%s/library_hero.jpg" % aid)

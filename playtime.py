@@ -139,13 +139,17 @@ def track(gid, folder, pid=None, on_finish=None, on_start=None):
                         # grace polls that confirm it really stopped are not
                         # part of the session.
                         seconds = int(w["last_seen"] - w["started"])
-                        _watches.pop(gid, None)
+                        cur = _watches.get(gid)
+                        if cur is not None and cur["stop"] is stop_flag:
+                            _watches.pop(gid, None)
                         if on_finish and seconds >= MIN_SESSION_SECONDS:
                             on_finish(gid, seconds)
                         return
                 elif time.time() - began > STARTUP_GRACE:
                     # it never started - a failed launch, or the user cancelled
-                    _watches.pop(gid, None)
+                    cur = _watches.get(gid)
+                    if cur is not None and cur["stop"] is stop_flag:
+                        _watches.pop(gid, None)
                     return
             stop_flag.wait(POLL_SECONDS)
         with _lock:
