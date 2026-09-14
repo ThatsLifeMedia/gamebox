@@ -60,7 +60,7 @@ def release(tag, body="notes here"):
     return FakeResp(200, json.dumps({
         "tag_name": tag,
         "body": body,
-        "html_url": "https://github.com/That-s-Life-Media/gamebox/releases/tag/" + tag,
+        "html_url": "https://github.com/ThatsLifeMedia/gamebox/releases/tag/" + tag,
     }).encode("utf-8"))
 
 

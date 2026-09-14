@@ -12,7 +12,7 @@ import json
 import re
 import urllib.request
 
-RELEASES_URL = "https://api.github.com/That-s-Life-Media/gamebox/releases/latest"
+RELEASES_URL = "https://api.github.com/ThatsLifeMedia/gamebox/releases/latest"
 USER_AGENT = "GameBox-Updater/1.0"
 TIMEOUT = 10
 
@@ -59,7 +59,7 @@ def check(current_version, timeout=TIMEOUT):
             "version": tag.lstrip("v"),
             "notes": (data.get("body") or "").strip(),
             "url": data.get("html_url")
-                   or "https://github.com/That-s-Life-Media/gamebox/releases",
+                   or "https://github.com/ThatsLifeMedia/gamebox/releases",
         }
     except Exception:
         return {"ok": False}

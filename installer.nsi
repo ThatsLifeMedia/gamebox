@@ -5,7 +5,7 @@ Unicode true
 !define APP      "GameBox"
 !define VERSION  "1.3.0"
 !define PUBLISHER "That's Life Media"
-!define WEBSITE  "https://github.com/That-s-Life-Media/gamebox"
+!define WEBSITE  "https://github.com/ThatsLifeMedia/gamebox"
 
 Name "${APP} ${VERSION}"
 OutFile "GameBox-Setup-${VERSION}.exe"
