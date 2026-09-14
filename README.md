@@ -12,6 +12,10 @@ Steam's public endpoints, so Valve sees your IP alongside game titles. There is 
 Settings toggle ("Fetch artwork & store info online") to turn that off, or run
 `scan-library.py --no-meta` to skip it.
 
+On launch, GameBox also asks GitHub's releases API whether a newer version exists, so it
+can show an "Update available" notice. That check can be turned off in Settings
+("Check for updates on startup").
+
 ## Built with AI, and I am not hiding it
 
 Yes — this was built with AI. Claude Code wrote the code. AI is a tool, the same as

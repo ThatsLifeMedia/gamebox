@@ -32,6 +32,7 @@ sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
 import library as L
 import migrate
 import playtime
+import updater
 
 APP_NAME = "GameBox"
 VERSION = "1.3.0"
@@ -56,6 +57,19 @@ def user_file(name):
 SETTINGS = user_file("gamebox-settings.json")
 
 _scanner = None
+
+# Result of the startup update check, filled in by a daemon thread so the UI
+# never waits on the network. update_info() hands a copy to the page.
+_update_state = {"checked": False}
+
+
+def _run_update_check():
+    try:
+        _update_state.update(updater.check(VERSION))
+    except Exception:
+        pass
+    finally:
+        _update_state["checked"] = True
 
 
 def load_scanner():
@@ -651,6 +665,41 @@ class Api:
                 pass
             return {"ok": False, "msg": str(e)}
 
+    # ---- updates: read-only check against the GitHub releases API. Nothing
+    # is downloaded or installed; the page just links to the release.
+    def update_info(self):
+        """Cached result of the startup update check, plus the dismissed version."""
+        st = dict(_update_state)
+        st["dismissed"] = self.settings_get().get("update_dismissed")
+        return {"ok": True, "state": st}
+
+    def update_check_now(self):
+        """Run the check synchronously (Settings 'Check now' button)."""
+        try:
+            res = updater.check(VERSION)
+        except Exception:
+            res = {"ok": False}
+        res["checked"] = True
+        _update_state.update(res)
+        return self.update_info()
+
+    def update_dismiss(self, version):
+        self.settings_set({"update_dismissed": version})
+        return {"ok": True}
+
+    def open_url(self, url):
+        """Open a GameBox release link in the browser. Anything else is refused -
+        this keeps a crafted library entry from turning the bridge into an
+        open redirect."""
+        u = (url or "").strip()
+        if u.startswith("https://github.com/zmaya13/gamebox/"):
+            try:
+                webbrowser.open(u)
+                return {"ok": True}
+            except Exception as e:
+                return {"ok": False, "msg": str(e)}
+        return {"ok": False, "msg": "Blocked"}
+
     # ---- setup
     def drives(self):
         """Fixed drives worth scanning, plus which launchers are installed."""
@@ -859,7 +908,13 @@ def main():
     html = startup()
 
     api = Api()
-    geom = saved_geometry(api.settings_get())
+    st0 = api.settings_get()
+    geom = saved_geometry(st0)
+
+    # Update check: one HTTPS call to the GitHub releases API on a daemon
+    # thread. Disabled in Settings; a failed check stays silent.
+    if st0.get("update_check", True):
+        threading.Thread(target=_run_update_check, daemon=True).start()
 
     win = webview.create_window(
         APP_NAME,

@@ -396,6 +396,13 @@ tr:hover .rowplay,tr.sel .rowplay{opacity:1}
 .empty{padding:3cqw;text-align:center;color:var(--tx3);font-size:.75cqw}
 .empty b{display:block;font-family:var(--disp);font-size:1cqw;color:var(--tx2);margin-bottom:.3cqw}
 
+/* update available modal */
+#updmodal{position:fixed;inset:0;z-index:90;display:flex;align-items:center;justify-content:center;background:rgba(4,6,10,.6)}
+#updcard{width:20cqw;max-width:92vw;max-height:80vh;display:flex;flex-direction:column;gap:.5cqw;padding:.9cqw 1cqw;border:1px solid var(--edge2);border-radius:.6cqw;background:var(--g1)}
+#updcard h3{font-family:var(--disp);font-size:.95cqw;color:var(--tx);margin:0}
+#updnotes{font-size:.62cqw;color:var(--tx2);white-space:pre-wrap;overflow:auto;max-height:22cqw;line-height:1.45}
+#updcard .row{display:flex;gap:.4cqw;justify-content:flex-end}
+
 /* ---- 3D CASE ---- */
 .case3d{--w:6cqw;width:var(--w);height:calc(var(--w)/.667);position:relative;transform-style:preserve-3d;
   transform:rotateX(6deg) rotateY(var(--ry,-22deg));transition:transform .5s cubic-bezier(.2,.8,.25,1)}
@@ -797,6 +804,7 @@ body.native .tbar .logo{cursor:default}
         <span class="s ok"><b></b><span id="stsrc">Steam · GOG · Epic · EA App connected</span></span>
         <span class="s info"><b></b><span id="start">Artwork: 28 real covers · 7 generated</span></span>
         <span class="s warn" id="stwarn" style="display:none"><b></b><span id="stwarntx"></span></span>
+        <span class="s info" id="stup" style="display:none;cursor:pointer"><b></b><span id="stupt"></span></span>
         <div class="right"><span id="stright">No library yet</span></div>
       </div>
     </div>
@@ -924,6 +932,55 @@ const stateLabel=g=>g.state==="err"?["FILES MISSING","err"]:g.state==="upd"?["UP
 /* ---------- persisted state ---------- */
 const LS=(k,d)=>{try{const v=localStorage.getItem("gamebox."+k);return v===null?d:JSON.parse(v)}catch(e){return d}};
 const SS=(k,v)=>{try{localStorage.setItem("gamebox."+k,JSON.stringify(v))}catch(e){}};
+
+/* ---------- update checker state ---------- */
+/* UPD holds the cached result from the Python-side startup check; UPDSET
+   mirrors the Python-side settings (the toggle must be readable by the app
+   before this page exists, so unlike the other switches it is not in LS). */
+let UPD=null,UPDSET={};
+function updAvailable(){return !!(UPD&&UPD.ok&&UPD.update&&UPD.version&&UPD.version!==UPD.dismissed)}
+function renderUpdateBadge(){
+  const b=document.getElementById("stup");
+  if(!b)return;
+  const show=updAvailable();
+  b.style.display=show?"":"none";
+  if(show)document.getElementById("stupt").textContent="Update available: v"+UPD.version;
+}
+function pollUpdate(){
+  const api=bridge();
+  if(!api||!api.update_info)return;
+  api.update_info().then(j=>{
+    if(!j||!j.ok)return;
+    UPD=j.state;UPD.dismissed=j.state.dismissed;
+    renderUpdateBadge();updInfoText();
+    if(!j.state.checked)setTimeout(pollUpdate,5000);  // startup thread still working
+  }).catch(()=>{});
+}
+function updInfoText(){
+  const el=document.getElementById("updinfo");
+  if(!el)return;
+  el.textContent=!UPD||!UPD.checked?"Checking…":
+    UPD.ok&&UPD.update?("v"+UPD.version+" is available — click the update notice below to see what's new."):
+    UPD.ok?"You're on the latest version.":
+    "Couldn't reach GitHub — will try again next launch.";
+}
+function openUpdatePanel(){
+  if(!updAvailable())return;
+  closeUpdatePanel();
+  const m=document.createElement("div");
+  m.id="updmodal";
+  m.innerHTML=`<div id="updcard"><h3>GameBox v${esc(UPD.version)} is available</h3>
+    <div id="updnotes">${esc(UPD.notes||"No release notes published.")}</div>
+    <div class="row"><button class="btn2" id="upddismiss" type="button">Dismiss</button>
+    <button class="btn2" id="upddl" type="button" style="font-weight:700">Download</button></div></div>`;
+  m.addEventListener("click",e=>{
+    if(e.target===m)closeUpdatePanel();
+    else if(e.target.closest("#upddl")){const api=bridge();if(api&&api.open_url)api.open_url(UPD.url).then(j=>{if(!j||!j.ok)showToast("Couldn't open the browser")});}
+    else if(e.target.closest("#upddismiss")){const api=bridge();if(api&&api.update_dismiss)api.update_dismiss(UPD.version).then(()=>{UPD.dismissed=UPD.version;renderUpdateBadge()});closeUpdatePanel();}
+  });
+  document.body.appendChild(m);
+}
+function closeUpdatePanel(){const m=document.getElementById("updmodal");if(m)m.remove()}
 
 /* ---------- profile ---------- */
 const AVATARS=["","\u{1F3AE}","\u{1F47E}","\u{1F579}\uFE0F","\u{1F98A}","\u{1F419}","\u{1F319}","\u26A1","\u{1F344}","\u{1F3A7}"];
@@ -1456,6 +1513,10 @@ function pageSettings(){
       </div>
       ${rows.map(([k,t,d,v])=>`<div class="setrow"><div><div class="t">${t}</div><div class="d">${d}</div></div>
         <div class="sw ${v?"on":""}" data-set="${k}"></div></div>`).join("")}
+      <div class="setrow"><div><div class="t">Check for updates on startup</div><div class="d">GameBox asks GitHub once per launch whether a newer release exists</div></div>
+        <div class="sw ${UPDSET.update_check!==false?"on":""}" id="updtoggle"></div></div>
+      <div class="setrow"><div><div class="t">Updates</div><div class="d" id="updinfo">Checking…</div></div>
+        <button class="btn2" id="updcheck" type="button" style="margin-left:auto">Check now</button></div>
       <div class="setrow"><div><div class="t">Accent colour</div><div class="d">Used for highlights, buttons and the scanner</div></div>
         <div class="accrow">${[["#ff7a1a","#ffb648"],["#4aa3ff","#7fd0ff"],["#57d68d","#9ff0bf"],["#b47ae6","#dcb6ff"],["#ff6b6b","#ffa3a3"]]
           .map(([a,b])=>`<div class="accdot ${LS("acc","#ff7a1a")===a?"on":""}" data-acc="${a}" data-acc2="${b}" style="background:linear-gradient(140deg,${b},${a})"></div>`).join("")}</div></div>
@@ -1644,6 +1705,14 @@ document.addEventListener("click",e=>{
   const tb=t.closest("[data-tab]");if(tb){S.tab=tb.dataset.tab;render();return}
   if(t.closest("#rerun")){openSetup(0);return}
   const st=t.closest("[data-set]");if(st){const k=st.dataset.set,v=!LS(k,k!=="scanstart");SS(k,v);applySettings();render();return}
+  // ---- update checker
+  if(t.closest("#stup")){openUpdatePanel();return}
+  if(t.closest("#updtoggle")){const api=bridge(),tg=t.closest("#updtoggle"),v=!(UPDSET.update_check!==false);
+    UPDSET.update_check=v;if(api&&api.settings_set)api.settings_set({update_check:v});tg.classList.toggle("on",v);return}
+  if(t.closest("#updcheck")){const api=bridge();
+    if(api&&api.update_check_now){showToast("Checking for updates…");
+      api.update_check_now().then(j=>{if(j&&j.ok){UPD=j.state;renderUpdateBadge();updInfoText();
+        showToast(UPD.ok&&UPD.update?("GameBox v"+UPD.version+" is available"):UPD.ok?"You're on the latest version.":"Couldn't reach GitHub")}}).catch(()=>showToast("Couldn't check for updates"))}return}
   const ac=t.closest("[data-acc]");if(ac){SS("acc",ac.dataset.acc);SS("acc2",ac.dataset.acc2);applySettings();render();return}
   const row=t.closest("[data-id]");if(row){const id=row.dataset.id,same=S.sel===id;S.sel=id;
     const pops=row.classList.contains("tile")||row.classList.contains("mcard")||row.classList.contains("artcell");
@@ -1921,6 +1990,10 @@ function onBridgeReady(){
     });
     document.getElementById("stsrc").textContent=j.app+" "+j.version+" \u00b7 "+j.games+" games ready to launch";
   }).catch(()=>{});
+  // The update toggle lives in Python-side settings (the startup check runs
+  // before this page exists), so mirror it here for the Settings page.
+  if(api&&api.settings_get)api.settings_get().then(st=>{UPDSET=st||{};if(S.page==="settings")render()}).catch(()=>{});
+  pollUpdate();
   // The storage meter needs the machine's real disk capacity, not the
   // author's. Ask once; renderRail() falls back until this lands.
   if(api.drives)api.drives().then(d=>{
