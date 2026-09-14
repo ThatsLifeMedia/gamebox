@@ -65,7 +65,7 @@ an Artwork manager and Settings.
 ## Install
 
 Download the latest `GameBox-Setup-*.exe` from
-[Releases](https://github.com/zmaya13/gamebox/releases) and run it. It installs per
+[Releases](https://github.com/That-s-Life-Media/gamebox/releases) and run it. It installs per
 user, needs no administrator rights, and uninstalls from Add/Remove Programs.
 Upgrading over an existing install keeps the library you scanned; uninstalling
 asks whether to remove it, along with your settings and the browser profile that
@@ -83,7 +83,7 @@ Reopen GameBox and your library is there.
 ## Run from source
 
 ```powershell
-git clone https://github.com/zmaya13/gamebox
+git clone https://github.com/That-s-Life-Media/gamebox
 cd gamebox
 pip install -r requirements.txt
 python scan-library.py --root C:\ --apply

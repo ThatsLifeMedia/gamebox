@@ -692,7 +692,7 @@ class Api:
         this keeps a crafted library entry from turning the bridge into an
         open redirect."""
         u = (url or "").strip()
-        if u.startswith("https://github.com/zmaya13/gamebox/"):
+        if u.startswith("https://github.com/That-s-Life-Media/gamebox/"):
             try:
                 webbrowser.open(u)
                 return {"ok": True}
