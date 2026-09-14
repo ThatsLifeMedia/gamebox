@@ -1,4 +1,4 @@
-# GameBox
+# GameBox by That's Life Media
 
 One library for every game on your PC — Steam, GOG, Epic, EA App, emulated discs and
 plain folders — and one button that launches them.

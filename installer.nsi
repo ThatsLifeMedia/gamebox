@@ -4,7 +4,7 @@ Unicode true
 
 !define APP      "GameBox"
 !define VERSION  "1.3.0"
-!define PUBLISHER "GameBox contributors"
+!define PUBLISHER "That's Life Media"
 !define WEBSITE  "https://github.com/zmaya13/gamebox"
 
 Name "${APP} ${VERSION}"
